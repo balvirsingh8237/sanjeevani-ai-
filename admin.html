@@ -3,41 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - Sanjeevani</title>
+<title>Admin Panel - Sanjeevani AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-  h1 { color: #1B4332; }
-  table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-  th { background-color: #40916C; color: white; }
-  .urgent { color: red; font-weight: bold; }
-  .normal { color: orange; font-weight: bold; }
-  .low { color: green; font-weight: bold; }
+  body { font-family: 'Work Sans', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+  .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  h1 { color: #1B4332; margin: 0; font-size: 1.5rem; }
+  .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
+  .btn-login { background: #4285F4; }
+  .btn-logout { background: #d93025; display: none; }
+  #admin-content { display: none; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+  th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
+  th { background-color: #1B4332; color: white; }
+  .urgent { color: #B5473E; font-weight: bold; }
+  .normal { color: #DA9A3D; font-weight: bold; }
+  .low { color: #40916C; font-weight: bold; }
+  .error-msg { color: red; font-weight: bold; margin-top: 20px; display: none; }
 </style>
 </head>
 <body>
 
-<h1>संजीवनी AI - Admin Dashboard</h1>
-<p>यहाँ गाँव से आई सभी रिपोर्ट्स दिखेंगी:</p>
+<div class="header">
+  <h1>संजीवनी AI - Admin Dashboard</h1>
+  <div>
+    <button id="login-btn" class="btn btn-login">Admin Login</button>
+    <button id="logout-btn" class="btn btn-logout">Logout</button>
+  </div>
+</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>नाम</th>
-      <th>उम्र</th>
-      <th>नंबर</th>
-      <th>पता</th>
-      <th>समस्या</th>
-      <th>गंभीरता</th>
-    </tr>
-  </thead>
-  <tbody id="table-body">
-    <!-- Data will load here -->
-  </tbody>
-</table>
+<p id="error-msg" class="error-msg">⚠️ पहुँच वर्जित (Access Denied): आप एडमिन नहीं हैं!</p>
+
+<div id="admin-content">
+  <table>
+    <thead>
+      <tr>
+        <th>नाम</th>
+        <th>उम्र</th>
+        <th>नंबर</th>
+        <th>पता</th>
+        <th>समस्या</th>
+        <th>गंभीरता</th>
+        <th>समय</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- Data will load here -->
+    </tbody>
+  </table>
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -50,29 +68,73 @@
   };
 
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  // === यहाँ अपनी ईमेल आईडी डालें जो एडमिन होगी ===
+  const ADMIN_EMAIL = "your.email@gmail.com"; 
+
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const adminContent = document.getElementById('admin-content');
+  const errorMsg = document.getElementById('error-msg');
   const tableBody = document.getElementById('table-body');
 
-  async function loadData() {
-    const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
-    const querySnapshot = await getDocs(q);
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${data.patientName}</td>
-        <td>${data.age}</td>
-        <td>${data.mobile}</td>
-        <td>${data.village}</td>
-        <td>${data.problem}</td>
-        <td class="${data.severity}">${data.severity.toUpperCase()}</td>
-      `;
-      tableBody.appendChild(tr);
-    });
-  }
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+      
+      // चेक करें कि क्या लॉगिन करने वाला यूजर एडमिन है
+      if (user.email === ADMIN_EMAIL) {
+        errorMsg.style.display = 'none';
+        adminContent.style.display = 'block';
+        loadData();
+      } else {
+        adminContent.style.display = 'none';
+        errorMsg.style.display = 'block';
+      }
+    } else {
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      adminContent.style.display = 'none';
+      errorMsg.style.display = 'none';
+      tableBody.innerHTML = ''; // Clear data on logout
+    }
+  });
 
-  loadData();
+  loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
+  logoutBtn.addEventListener('click', () => signOut(auth));
+
+  async function loadData() {
+    tableBody.innerHTML = '<tr><td colspan="7">Loading data...</td></tr>';
+    try {
+      const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(q);
+      tableBody.innerHTML = '';
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : "N/A";
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${data.patientName}</td>
+          <td>${data.age}</td>
+          <td>${data.mobile}</td>
+          <td>${data.village}</td>
+          <td>${data.problem}</td>
+          <td class="${data.severity}">${data.severity.toUpperCase()}</td>
+          <td>${date}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    } catch (error) {
+      tableBody.innerHTML = '<tr><td colspan="7">Error loading data.</td></tr>';
+      console.error(error);
+    }
+  }
 </script>
 </body>
 </html>
