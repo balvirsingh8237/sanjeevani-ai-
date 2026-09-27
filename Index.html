@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanjeevani AI - Patient Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --green-deep: #1B4332; --green-mid: #40916C; --green-pale: #D8F3DC; --white: #FFFFFF; --ink: #16241D; --border: #CFE3D6; }
+  body { font-family: 'Work Sans', sans-serif; margin: 0; background: var(--white); color: var(--ink); }
+  header { display: flex; justify-content: space-between; padding: 15px 5%; border-bottom: 1px solid var(--border); align-items: center; background: var(--white); }
+  .brand { font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--green-deep); font-weight: bold; }
+  .btn-login { background: #4285F4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  .btn-logout { background: #d93025; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; display: none; }
+  .user-info { display: flex; align-items: center; gap: 10px; }
+  .user-info img { width: 35px; height: 35px; border-radius: 50%; display: none; }
+  
+  .container { max-width: 800px; margin: 40px auto; padding: 30px; background: var(--green-pale); border-radius: 12px; }
+  .form-group { margin-bottom: 15px; }
+  label { display: block; font-weight: 600; margin-bottom: 5px; }
+  input, textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); box-sizing: border-box; }
+  button.submit-btn { background: var(--green-deep); color: white; padding: 12px 20px; border: none; border-radius: 6px; width: 100%; font-size: 1.1rem; cursor: pointer; }
+  button.submit-btn:disabled { background: gray; cursor: not-allowed; }
+  
+  /* Chatbot */
+  #chat-widget { position: fixed; bottom: 80px; right: 20px; width: 320px; background: white; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: none; z-index: 1000; }
+  .chat-header { background: var(--green-deep); color: white; padding: 12px; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; display: flex; justify-content: space-between; }
+  .close-chat { cursor: pointer; background: none; border: none; color: white; font-weight: bold; font-size: 1.2rem; }
+  .chat-body { height: 300px; overflow-y: auto; padding: 15px; background: #FBFDFC; display: flex; flex-direction: column; gap: 10px; }
+  .chat-input { display: flex; padding: 10px; border-top: 1px solid var(--border); background: white; border-radius: 0 0 10px 10px; }
+  .chat-input input { flex: 1; margin-right: 10px; padding: 8px; border-radius: 4px; border: 1px solid var(--border); }
+  .chat-input button { background: var(--green-mid); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+  .chat-btn-toggle { position: fixed; bottom: 20px; right: 20px; background: var(--green-deep); color: white; border: none; padding: 15px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 999; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Sanjeevani AI</div>
+  <div class="user-info">
+    <span id="user-name"></span>
+    <img id="user-pic" src="" alt="Profile">
+    <button id="login-btn" class="btn-login">Google Login</button>
+    <button id="logout-btn" class="btn-logout">Logout</button>
+  </div>
+</header>
+
+<div class="container">
+  <h2>समस्या दर्ज करें</h2>
+  <form id="report-form">
+    <div class="form-group">
+      <label>मरीज़ का नाम</label>
+      <input type="text" id="name" required placeholder="पूरा नाम">
+    </div>
+    <div class="form-group">
+      <label>उम्र</label>
+      <input type="number" id="age" required placeholder="उम्र">
+    </div>
+    <div class="form-group">
+      <label>मोबाइल नंबर</label>
+      <input type="tel" id="mobile" required placeholder="10 अंकों का नंबर">
+    </div>
+    <div class="form-group">
+      <label>गाँव / पता</label>
+      <input type="text" id="village" required placeholder="गाँव, ब्लॉक, जिला">
+    </div>
+    <div class="form-group">
+      <label>समस्या का विवरण</label>
+      <textarea id="problem" rows="3" required placeholder="बीमारी या समस्या बताएं"></textarea>
+    </div>
+    <div class="form-group">
+      <label>समस्या कितनी गंभीर है?</label>
+      <select id="severity" required>
+        <option value="urgent">तुरंत (6 से 24 घंटे)</option>
+        <option value="normal" selected>सामान्य (3 से 5 दिन)</option>
+        <option value="low">कम गंभीर (1 से 2 हफ्ते)</option>
+      </select>
+    </div>
+    <button type="submit" id="submit-btn" class="submit-btn" disabled>लॉगिन के बाद सबमिट करें</button>
+  </form>
+</div>
+
+<!-- Chatbot -->
+<button class="chat-btn-toggle" id="chat-toggle">💬</button>
+<div id="chat-widget">
+  <div class="chat-header">
+    <span>Sanjeevani AI</span>
+    <button class="close-chat" id="close-chat">✕</button>
+  </div>
+  <div class="chat-body" id="chat-body">
+    <div style="background: var(--green-pale); padding: 8px 12px; border-radius: 8px; align-self: flex-start; max-width: 80%;">नमस्ते! मैं संजीवनी AI हूँ। आपकी क्या मदद करूँ?</div>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chat-text" placeholder="AI से पूछें...">
+    <button id="chat-send">Send</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgYfbCOPHqQz4ML3q-9KRtBZ5FItnGdeo",
+    authDomain: "sanjeevani-ai-52213.firebaseapp.com",
+    projectId: "sanjeevani-ai-52213",
+    storageBucket: "sanjeevani-ai-52213.firebasestorage.app",
+    messagingSenderId: "1009486245779",
+    appId: "1:1009486245779:web:4c83bb570237c1f2ddc266"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  let currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+      document.getElementById('user-name').innerText = user.displayName;
+      document.getElementById('user-pic').src = user.photoURL;
+      document.getElementById('user-pic').style.display = 'inline-block';
+      submitBtn.disabled = false;
+      submitBtn.innerText = "शिकायत दर्ज करें";
+    } else {
+      currentUser = null;
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      document.getElementById('user-name').innerText = '';
+      document.getElementById('user-pic').style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = "लॉगिन के बाद सबमिट करें";
+    }
+  });
+
+  loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
+  logoutBtn.addEventListener('click', () => signOut(auth));
+
+  document.getElementById('report-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting...";
+
+    try {
+      await addDoc(collection(db, "reports"), {
+        patientName: document.getElementById('name').value,
+        age: document.getElementById('age').value,
+        mobile: document.getElementById('mobile').value,
+        village: document.getElementById('village').value,
+        problem: document.getElementById('problem').value,
+        severity: document.getElementById('severity').value,
+        userId: currentUser.uid,
+        timestamp: serverTimestamp(),
+        status: "Pending"
+      });
+      alert("शिकायत सफलतापूर्वक दर्ज हो गई है!");
+      e.target.reset();
+    } catch (error) {
+      alert("Error: " + error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "शिकायत दर्ज करें";
+    }
+  });
+
+  // Chat Logic
+  const chatToggle = document.getElementById('chat-toggle');
+  const chatWidget = document.getElementById('chat-widget');
+  const closeChat = document.getElementById('close-chat');
+  const chatSendBtn = document.getElementById('chat-send');
+  const chatInput = document.getElementById('chat-text');
+  const chatBodyEl = document.getElementById('chat-body');
+
+  chatToggle.addEventListener('click', () => chatWidget.style.display = 'block');
+  closeChat.addEventListener('click', () => chatWidget.style.display = 'none');
+
+  function addMessage(text, isUser) {
+    const div = document.createElement('div');
+    div.style.padding = '8px 12px';
+    div.style.borderRadius = '8px';
+    div.style.marginBottom = '10px';
+    div.style.maxWidth = '80%';
+    div.style.background = isUser ? 'var(--green-deep)' : 'var(--green-pale)';
+    div.style.color = isUser ? 'white' : 'black';
+    div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+    div.innerText = text;
+    chatBodyEl.appendChild(div);
+    chatBodyEl.scrollTop = chatBodyEl.scrollHeight;
+  }
+
+  chatSendBtn.addEventListener('click', async () => {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    addMessage(text, true);
+    chatInput.value = '';
+
+    const loadingId = 'load-' + Date.now();
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = loadingId;
+    loadingDiv.innerText = "AI सोच रहा है...";
+    loadingDiv.style.alignSelf = "flex-start";
+    chatBodyEl.appendChild(loadingDiv);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      document.getElementById(loadingId).remove();
+      addMessage(data.reply || "माफ़ करें, कोई जवाब नहीं मिला।", false);
+    } catch (err) {
+      document.getElementById(loadingId).remove();
+      addMessage("सर्वर से संपर्क टूट गया।", false);
+    }
+  });
+</script>
+</body>
+</html>
