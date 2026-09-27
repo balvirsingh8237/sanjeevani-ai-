@@ -6,150 +6,99 @@
 <title>Sanjeevani AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* तुम्हारा ओरिजिनल बेहतरीन CSS */
-  :root{ --green-deep:#1B4332; --green-mid:#40916C; --green-pale:#D8F3DC; --white:#FFFFFF; --ink:#16241D; --ink-soft:#4A5D53; --amber:#DA9A3D; --urgent:#B5473E; --border:#CFE3D6; --radius-card: 14px; --radius-soft: 8px; --max-w: 1180px; }
+  :root{ --green-deep:#1B4332; --green-mid:#40916C; --green-pale:#D8F3DC; --white:#FFFFFF; --ink:#16241D; --border:#CFE3D6; --radius-card: 14px; --max-w: 1180px; }
   body{ margin:0; background:var(--white); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.55; }
   h1,h2,h3{font-family:'Fraunces', serif; margin:0; color:var(--green-deep);}
   
   header{ display:flex; align-items:center; justify-content:space-between; padding:18px 6%; border-bottom:1px solid var(--border); }
-  .header-inner{max-width:var(--max-w); margin:0 auto; width:100%; display:flex; align-items:center; justify-content:space-between;}
-  .brand{display:flex; align-items:center; gap:10px; font-family:'Fraunces', serif; font-weight:600; font-size:1.5rem; color:var(--green-deep);}
+  .brand{font-family:'Fraunces', serif; font-weight:600; font-size:1.5rem; color:var(--green-deep);}
+  .hero{ text-align:center; padding:40px 6%; }
   
-  .auth-section { display: flex; align-items: center; gap: 15px; }
-  .btn-auth { background: var(--green-deep); color: white; border: none; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-weight: 600; }
-  #logout-btn { background: #d93025; display: none; }
-  .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-  .user-profile img { width: 32px; height: 32px; border-radius: 50%; display: none; }
-
-  .hero{ display:flex; align-items:center; gap:40px; padding:64px 6% 48px; flex-wrap:wrap; max-width:var(--max-w); margin:0 auto; }
-  .hero-text{flex:1 1 380px;}
-  .hero-text h1{font-size:2.6rem; font-weight:700; line-height:1.15;}
-  .hero-text p{color:var(--ink-soft); font-size:1.05rem; margin-top:16px;}
+  /* नया AI सेक्शन डिज़ाइन */
+  .ai-section { background: linear-gradient(135deg, #D8F3DC, #e8f7ea); border-radius: var(--radius-card); padding: 30px; max-width: 800px; margin: 0 auto 40px auto; border: 2px solid var(--green-mid); box-shadow: 0 8px 20px rgba(64, 145, 108, 0.15); }
+  .ai-section h2 { margin-bottom: 15px; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .ai-chat-box { background: white; height: 250px; border-radius: 10px; overflow-y: auto; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .ai-input-area { display: flex; gap: 10px; }
+  .ai-input-area input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+  .ai-input-area button { background: var(--green-deep); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
   
-  #report{background:var(--green-pale); border-radius:24px; padding:48px 5%; max-width:var(--max-w); margin:40px auto;}
-  .form-card{ background:var(--white); border-radius:var(--radius-card); padding:32px; border:1px solid var(--border); }
+  /* फॉर्म डिज़ाइन */
+  .form-card{ background:var(--white); border-radius:var(--radius-card); padding:32px; border:1px solid var(--border); max-width: 800px; margin: 0 auto 40px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
   .field{margin-bottom:18px;}
   .field label{display:block; font-weight:500; margin-bottom:6px;}
-  .field input, .field textarea, .field select{ width:100%; padding:11px 13px; border-radius:var(--radius-soft); border:1px solid var(--border); font-family:inherit; font-size:0.95rem; }
-  
-  .severity-options{display:flex; gap:12px; flex-wrap:wrap; margin-top: 10px;}
-  .severity-card{ flex:1 1 150px; border:2px solid var(--border); border-radius:var(--radius-card); padding:16px 14px; cursor:pointer; position:relative; }
-  .severity-card input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer;}
-  .severity-card .dot{width:10px; height:10px; border-radius:50%; margin-bottom:10px;}
-  .severity-card[data-level="urgent"] .dot{background:var(--urgent);}
-  .severity-card[data-level="normal"] .dot{background:var(--amber);}
-  .severity-card[data-level="low"] .dot{background:var(--green-mid);}
-  .severity-card.selected{border-color:var(--green-deep); background:var(--green-pale);}
-
-  .submit-btn{ margin-top:15px; width:100%; padding:14px; border:none; border-radius:var(--radius-soft); background:var(--green-deep); color:var(--white); font-weight:600; font-size:1rem; cursor:pointer; }
-  .submit-btn:disabled { background: #8fa89d; cursor: not-allowed; }
-
-  /* Chat Widget */
-  #chat-toggle{ position:fixed; bottom:24px; right:24px; width:58px; height:58px; border-radius:50%; background:var(--green-deep); color:var(--white); border:none; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.2); font-size:1.4rem; z-index:40; }
-  #chat-panel{ position:fixed; bottom:94px; right:24px; width:340px; height:440px; background:var(--white); border-radius:16px; border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.18); display:flex; flex-direction:column; display: none; z-index:40; }
-  .chat-head{background:var(--green-deep); color:var(--white); padding:14px 16px; font-weight:600; display:flex; justify-content:space-between;}
-  .chat-head button{background:none; border:none; color:var(--white); font-size:1rem; cursor:pointer;}
-  .chat-body{flex:1; padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
-  .chat-input{display:flex; border-top:1px solid var(--border);}
-  .chat-input input{flex:1; border:none; padding:12px 14px; outline:none;}
-  .chat-input button{border:none; background:var(--green-mid); color:var(--white); padding:0 18px; cursor:pointer; font-weight:600;}
+  .field input, .field textarea, .field select{ width:100%; padding:11px 13px; border-radius:8px; border:1px solid var(--border); font-family:inherit; box-sizing: border-box; }
+  .submit-btn{ width:100%; padding:14px; border:none; border-radius:8px; background:var(--green-deep); color:var(--white); font-weight:600; font-size:1rem; cursor:pointer; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <div class="brand">Sanjeevani AI</div>
-    <div class="auth-section">
-      <div class="user-profile">
-        <img id="user-pic" src="" alt="Profile">
-        <span id="user-name"></span>
-      </div>
-      <button id="login-btn" class="btn-auth">Login to Report</button>
-      <button id="logout-btn" class="btn-auth">Logout</button>
-    </div>
-  </div>
+  <div class="brand">Sanjeevani AI</div>
 </header>
 
 <section class="hero">
-  <div class="hero-text">
-    <h1>Help reaches every village, on time</h1>
-    <p>Tell us your problem and we'll route it to the right team based on how urgent it is. Chat with Sanjeevani AI or fill the form below.</p>
+  <h1>हर गाँव तक मदद, समय पर</h1>
+  <p>AI से अपनी बीमारी का इलाज पूछें, या गंभीर स्थिति में नीचे फॉर्म भरकर डॉक्टर को बुलाएं।</p>
+</section>
+
+<!-- नया AI सेक्शन -->
+<section class="ai-section">
+  <h2>🤖 संजीवनी AI डॉक्टर</h2>
+  <p style="text-align:center; margin-top:-10px; margin-bottom:20px;">अपनी बीमारी या लक्षण बताएँ, AI आपको तुरंत सलाह देगा।</p>
+  
+  <div class="ai-chat-box" id="ai-chat-box">
+    <div style="background:var(--green-pale); padding:10px 15px; border-radius:10px; max-width:80%; align-self:flex-start;">
+      नमस्ते! मैं संजीवनी AI हूँ। आपको क्या परेशानी है?
+    </div>
+  </div>
+  
+  <div class="ai-input-area">
+    <input type="text" id="ai-input" placeholder="जैसे: मुझे दो दिन से तेज़ बुखार है...">
+    <button id="ai-send-btn">पूछें</button>
   </div>
 </section>
 
-<section id="report">
-  <div class="form-card">
-    <h2>अपनी समस्या यहाँ बताइए</h2>
-    <form id="problem-form">
-      <div class="field">
-        <label>Name (नाम)</label>
-        <input type="text" id="name" required placeholder="Your full name">
-      </div>
-      <div class="field">
-        <label>Age (उम्र)</label>
-        <input type="number" id="age" required placeholder="e.g. 34">
-      </div>
-      <div class="field">
-        <label>Mobile Number (मोबाइल)</label>
-        <input type="tel" id="mobile" required placeholder="10-digit number">
-      </div>
-      <div class="field">
-        <label>Village / Address (गाँव)</label>
-        <input type="text" id="village" required placeholder="Village, block, district">
-      </div>
-      <div class="field">
-        <label>Problem Description (समस्या)</label>
-        <textarea id="problem" rows="3" required placeholder="Describe your problem"></textarea>
-      </div>
-      <div class="field">
-        <label>How serious is the problem? (गंभीरता)</label>
-        <div class="severity-options">
-          <label class="severity-card" data-level="urgent">
-            <input type="radio" name="severity" value="urgent" required>
-            <div class="dot"></div>
-            <div class="title">Urgent</div>
-            <div class="time">6–24 hours</div>
-          </label>
-          <label class="severity-card selected" data-level="normal">
-            <input type="radio" name="severity" value="normal" checked>
-            <div class="dot"></div>
-            <div class="title">Normal</div>
-            <div class="time">3–5 days</div>
-          </label>
-          <label class="severity-card" data-level="low">
-            <input type="radio" name="severity" value="low">
-            <div class="dot"></div>
-            <div class="title">Low priority</div>
-            <div class="time">1–2 weeks</div>
-          </label>
-        </div>
-      </div>
-      <button type="submit" id="submit-btn" class="submit-btn" disabled>Login required to Submit</button>
-    </form>
-  </div>
+<!-- फॉर्म सेक्शन -->
+<section class="form-card">
+  <h2>📝 डॉक्टर को बुलाने के लिए फॉर्म भरें</h2>
+  <form id="problem-form">
+    <div class="field">
+      <label>नाम</label>
+      <input type="text" id="name" required placeholder="पूरा नाम">
+    </div>
+    <div class="field">
+      <label>उम्र</label>
+      <input type="number" id="age" required placeholder="उम्र">
+    </div>
+    <div class="field">
+      <label>मोबाइल नंबर</label>
+      <input type="tel" id="mobile" required placeholder="10 अंकों का नंबर">
+    </div>
+    <div class="field">
+      <label>गाँव / पता</label>
+      <input type="text" id="village" required placeholder="गाँव, ब्लॉक, जिला">
+    </div>
+    <div class="field">
+      <label>समस्या का विवरण</label>
+      <textarea id="problem" rows="3" required placeholder="बीमारी या समस्या बताएं"></textarea>
+    </div>
+    <div class="field">
+      <label>समस्या कितनी गंभीर है?</label>
+      <select id="severity" required>
+        <option value="urgent">तुरंत (6 से 24 घंटे)</option>
+        <option value="normal" selected>सामान्य (3 से 5 दिन)</option>
+        <option value="low">कम गंभीर (1 से 2 हफ्ते)</option>
+      </select>
+    </div>
+    <button type="submit" id="submit-btn" class="submit-btn">शिकायत दर्ज करें (Submit)</button>
+  </form>
 </section>
-
-<button id="chat-toggle">💬</button>
-<div id="chat-panel">
-  <div class="chat-head">
-    <span>Sanjeevani AI Assistant</span>
-    <button id="close-chat">✕</button>
-  </div>
-  <div class="chat-body" id="chat-body">
-    <div style="background:var(--green-pale); padding:10px; border-radius:10px; max-width:80%;">नमस्ते! मैं संजीवनी AI हूँ। आपकी क्या मदद करूँ?</div>
-  </div>
-  <div class="chat-input">
-    <input type="text" id="chat-text" placeholder="Type your question...">
-    <button id="chat-send">Send</button>
-  </div>
-</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+  // Firebase Setup
   const firebaseConfig = {
     apiKey: "AIzaSyAgYfbCOPHqQz4ML3q-9KRtBZ5FItnGdeo",
     authDomain: "sanjeevani-ai-52213.firebaseapp.com",
@@ -160,55 +109,12 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
 
-  // Auth Logic
-  let currentUser = null;
-  const loginBtn = document.getElementById('login-btn');
-  const logoutBtn = document.getElementById('logout-btn');
+  // Form Submit Logic
   const submitBtn = document.getElementById('submit-btn');
-  const userPic = document.getElementById('user-pic');
-  const userName = document.getElementById('user-name');
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'block';
-      userPic.src = user.photoURL;
-      userPic.style.display = 'block';
-      userName.innerText = user.displayName.split(' ')[0];
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit Complaint";
-    } else {
-      currentUser = null;
-      loginBtn.style.display = 'block';
-      logoutBtn.style.display = 'none';
-      userPic.style.display = 'none';
-      userName.innerText = '';
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Login required to Submit";
-    }
-  });
-
-  loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-  logoutBtn.addEventListener('click', () => signOut(auth));
-
-  // Severity Card styling
-  document.querySelectorAll('.severity-card input').forEach(inp => {
-    inp.addEventListener('change', () => {
-      document.querySelectorAll('.severity-card').forEach(c => c.classList.remove('selected'));
-      inp.closest('.severity-card').classList.add('selected');
-    });
-  });
-
-  // Form Submit
   document.getElementById('problem-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUser) return;
-    submitBtn.disabled = true;
     submitBtn.innerText = "Submitting...";
 
     try {
@@ -218,58 +124,49 @@
         mobile: document.getElementById('mobile').value,
         village: document.getElementById('village').value,
         problem: document.getElementById('problem').value,
-        severity: document.querySelector('input[name="severity"]:checked').value,
-        userId: currentUser.uid,
+        severity: document.getElementById('severity').value,
         timestamp: serverTimestamp()
       });
-      alert("शिकायत सफलतापूर्वक दर्ज हो गई है!");
+      alert("शिकायत सफलतापूर्वक दर्ज हो गई है! टीम जल्द संपर्क करेगी।");
       e.target.reset();
-      document.querySelectorAll('.severity-card').forEach(c => c.classList.remove('selected'));
-      document.querySelector('.severity-card[data-level="normal"]').classList.add('selected');
     } catch (error) {
       alert("Error: " + error.message);
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit Complaint";
+      submitBtn.innerText = "शिकायत दर्ज करें (Submit)";
     }
   });
 
-  // Chat Logic
-  const chatToggle = document.getElementById('chat-toggle');
-  const chatPanel = document.getElementById('chat-panel');
-  const closeChat = document.getElementById('close-chat');
-  const chatSendBtn = document.getElementById('chat-send');
-  const chatInput = document.getElementById('chat-text');
-  const chatBodyEl = document.getElementById('chat-body');
+  // AI Chat Logic (Connects to Vercel API we made earlier)
+  const aiSendBtn = document.getElementById('ai-send-btn');
+  const aiInput = document.getElementById('ai-input');
+  const aiChatBox = document.getElementById('ai-chat-box');
 
-  chatToggle.addEventListener('click', () => chatPanel.style.display = 'flex');
-  closeChat.addEventListener('click', () => chatPanel.style.display = 'none');
-
-  function addMessage(text, isUser) {
+  function addMsg(text, isUser) {
     const div = document.createElement('div');
-    div.style.padding = '10px';
+    div.style.padding = '10px 15px';
     div.style.borderRadius = '10px';
-    div.style.marginBottom = '10px';
     div.style.maxWidth = '80%';
     div.style.background = isUser ? 'var(--green-deep)' : 'var(--green-pale)';
-    div.style.color = isUser ? 'white' : 'var(--ink)';
+    div.style.color = isUser ? 'white' : 'black';
     div.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
     div.innerText = text;
-    chatBodyEl.appendChild(div);
-    chatBodyEl.scrollTop = chatBodyEl.scrollHeight;
+    aiChatBox.appendChild(div);
+    aiChatBox.scrollTop = aiChatBox.scrollHeight;
   }
 
-  chatSendBtn.addEventListener('click', async () => {
-    const text = chatInput.value.trim();
+  aiSendBtn.addEventListener('click', async () => {
+    const text = aiInput.value.trim();
     if (!text) return;
-    addMessage(text, true);
-    chatInput.value = '';
+    addMsg(text, true);
+    aiInput.value = '';
 
+    const loadingId = 'load-' + Date.now();
     const loadingDiv = document.createElement('div');
-    loadingDiv.innerText = "Typing...";
+    loadingDiv.id = loadingId;
+    loadingDiv.innerText = "संजीवनी AI सोच रहा है...";
     loadingDiv.style.alignSelf = "flex-start";
-    loadingDiv.style.fontSize = "0.8rem";
-    chatBodyEl.appendChild(loadingDiv);
+    loadingDiv.style.fontSize = "0.85rem";
+    aiChatBox.appendChild(loadingDiv);
 
     try {
       const res = await fetch('/api/chat', {
@@ -278,11 +175,11 @@
         body: JSON.stringify({ message: text })
       });
       const data = await res.json();
-      loadingDiv.remove();
-      addMessage(data.reply || "No response", false);
+      document.getElementById(loadingId).remove();
+      addMsg(data.reply || "मुझे समझ नहीं आया।", false);
     } catch (err) {
-      loadingDiv.remove();
-      addMessage("Network Error", false);
+      document.getElementById(loadingId).remove();
+      addMsg("सर्वर से संपर्क टूट गया है।", false);
     }
   });
 </script>
