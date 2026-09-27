@@ -22,8 +22,8 @@ export default async function handler(req, res) {
         'X-Title': 'Sanjeevani AI'
       },
       body: JSON.stringify({
-        // 100% फ्री Google Gemma मॉडल
-        model: "google/gemma-2-9b-it:free", 
+        // सबसे स्टेबल और 100% फ्री मॉडल
+        model: "mistralai/mistral-7b-instruct:free", 
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
