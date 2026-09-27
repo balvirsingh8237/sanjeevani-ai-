@@ -1,13 +1,13 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'सिर्फ POST रिक्वेस्ट अलाउड है।' });
   }
 
   const { message } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'API Key missing' });
+    return res.status(500).json({ error: 'Vercel में GEMINI_API_KEY सेट नहीं है!' });
   }
 
   const systemPrompt = "तुम 'संजीवनी AI' हो, एक मेडिकल असिस्टेंट। तुम्हें गांव के लोगों की स्वास्थ्य समस्याओं को समझना है और उन्हें सही सलाह देनी है। हमेशा हिंदी या आसान इंग्लिश में जवाब दो। तुम्हारे जवाब बहुत छोटे और मददगार होने चाहिए।";
@@ -24,15 +24,21 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    
-    if (data.error) {
-       return res.status(500).json({ error: data.error.message });
+
+    // अगर API ने कोई एरर भेजा है
+    if (!response.ok) {
+      return res.status(500).json({ error: data.error?.message || 'Gemini API ने एरर दिया है।' });
     }
 
-    const reply = data.candidates[0].content.parts[0].text;
-    res.status(200).json({ reply });
+    // अगर सही जवाब आया है
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      const reply = data.candidates[0].content.parts[0].text;
+      return res.status(200).json({ reply });
+    } else {
+      return res.status(500).json({ error: 'Gemini से कोई खाली जवाब आया है।' });
+    }
 
   } catch (error) {
-    res.status(500).json({ error: 'Failed to communicate with AI' });
+    return res.status(500).json({ error: 'Vercel Server Error: ' + error.message });
   }
 }
