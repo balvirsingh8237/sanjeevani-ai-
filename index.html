@@ -334,7 +334,7 @@
     chatBody.appendChild(loadingDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    try {
+        try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -342,16 +342,15 @@
       });
       const data = await res.json();
       document.getElementById(loadingId).remove();
-      addMsg(data.reply || (currentLang === 'hi' ? "मुझे समझ नहीं आया।" : "I didn't understand."), false);
+      
+      // नया बदलाव: अब यह असली एरर दिखाएगा
+      if (data.error) {
+        addMsg("सिस्टम एरर: " + data.error, false);
+      } else {
+        addMsg(data.reply || (currentLang === 'hi' ? "मुझे समझ नहीं आया।" : "I didn't understand."), false);
+      }
     } catch (err) {
       document.getElementById(loadingId).remove();
       addMsg(currentLang === 'hi' ? "सर्वर से संपर्क टूट गया है।" : "Connection error.", false);
-    }
-  });
-
-  chatInput.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') chatSendBtn.click();
-  });
-</script>
-</body>
-</html>
+        }
+    
