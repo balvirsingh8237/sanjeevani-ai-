@@ -95,7 +95,6 @@
       <button id="lang-hi" class="lang-btn" onclick="changeLang('hi')">हिं</button>
     </div>
     
-    <!-- Auth UI -->
     <div class="auth-section">
       <img id="user-pic" class="user-pic" src="" alt="Profile">
       <button id="login-btn" class="btn-auth" data-i18n="btn_login">Login</button>
@@ -189,7 +188,6 @@
   let currentUser = null;
   let currentLang = 'en';
 
-  // --- Multi-Language Logic ---
   const translations = {
     en: {
       btn_login: "Login", btn_logout: "Logout", btn_ai: "Ask AI",
@@ -245,7 +243,7 @@
     updateSubmitButtonText();
   };
 
-  // --- Auth Logic ---
+  // Auth Logic
   const loginBtn = document.getElementById('login-btn');
   const logoutBtn = document.getElementById('logout-btn');
   const userPic = document.getElementById('user-pic');
@@ -271,7 +269,7 @@
   loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
   logoutBtn.addEventListener('click', () => signOut(auth));
 
-  // --- Form Logic ---
+  // Form Logic
   document.getElementById('problem-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return alert("Please login first");
@@ -301,7 +299,7 @@
     }
   });
 
-  // --- AI Modal Logic ---
+  // AI Modal Logic
   const aiModal = document.getElementById('ai-modal');
   window.openAI = () => { aiModal.style.display = 'flex'; };
   window.closeAI = () => { aiModal.style.display = 'none'; };
@@ -334,23 +332,37 @@
     chatBody.appendChild(loadingDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 
-        try {
+    try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
       });
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+         throw new Error("API Route Not Found (क्या api फोल्डर सही जगह है?)");
+      }
+
       const data = await res.json();
       document.getElementById(loadingId).remove();
-      
-      // नया बदलाव: अब यह असली एरर दिखाएगा
+
       if (data.error) {
-        addMsg("सिस्टम एरर: " + data.error, false);
+        addMsg("⚠️ एरर: " + data.error, false);
+      } else if (data.reply) {
+        addMsg(data.reply, false);
       } else {
-        addMsg(data.reply || (currentLang === 'hi' ? "मुझे समझ नहीं आया।" : "I didn't understand."), false);
+        addMsg(currentLang === 'hi' ? "मुझे समझ नहीं आया।" : "I didn't understand.", false);
       }
     } catch (err) {
       document.getElementById(loadingId).remove();
-      addMsg(currentLang === 'hi' ? "सर्वर से संपर्क टूट गया है।" : "Connection error.", false);
-        }
-    
+      addMsg("⚠️ तकनीकी खराबी: " + err.message, false);
+    }
+  });
+
+  chatInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') chatSendBtn.click();
+  });
+</script>
+</body>
+</html>
