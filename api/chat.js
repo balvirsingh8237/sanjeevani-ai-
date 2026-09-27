@@ -22,8 +22,8 @@ export default async function handler(req, res) {
         'X-Title': 'Sanjeevani AI'
       },
       body: JSON.stringify({
-        // सबसे स्टेबल और 100% फ्री मॉडल
-        model: "mistralai/mistral-7b-instruct:free", 
+        // DeepSeek का फ्री मॉडल
+        model: "deepseek/deepseek-chat:free", 
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
