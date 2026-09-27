@@ -1,0 +1,38 @@
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const { message } = req.body;
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API Key missing' });
+  }
+
+  const systemPrompt = "तुम 'संजीवनी AI' हो, एक मेडिकल असिस्टेंट। तुम्हें गांव के लोगों की स्वास्थ्य समस्याओं को समझना है और उन्हें सही सलाह देनी है। हमेशा हिंदी या आसान इंग्लिश में जवाब दो। तुम्हारे जवाब बहुत छोटे और मददगार होने चाहिए।";
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          { role: "user", parts: [{ text: systemPrompt + " User: " + message }] }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.error) {
+       return res.status(500).json({ error: data.error.message });
+    }
+
+    const reply = data.candidates[0].content.parts[0].text;
+    res.status(200).json({ reply });
+
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to communicate with AI' });
+  }
+}
