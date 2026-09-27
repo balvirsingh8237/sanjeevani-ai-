@@ -9,9 +9,10 @@
   body { font-family: 'Work Sans', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
   .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   h1 { color: #1B4332; margin: 0; font-size: 1.5rem; }
-  .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
-  .btn-login { background: #4285F4; }
+  .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; font-size: 1rem; }
+  .btn-login { background: #4285F4; } /* Google Blue */
   .btn-logout { background: #d93025; display: none; }
+  
   #admin-content { display: none; margin-top: 20px; }
   table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
   th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
@@ -19,7 +20,10 @@
   .urgent { color: #B5473E; font-weight: bold; }
   .normal { color: #DA9A3D; font-weight: bold; }
   .low { color: #40916C; font-weight: bold; }
-  .error-msg { color: red; font-weight: bold; margin-top: 20px; display: none; }
+  
+  #message-box { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; display: none; }
+  .error-msg { background: #ffe6e6; color: #d93025; border: 1px solid #d93025; }
+  .welcome-msg { background: #D8F3DC; color: #1B4332; border: 1px solid #40916C; }
 </style>
 </head>
 <body>
@@ -27,12 +31,12 @@
 <div class="header">
   <h1>संजीवनी AI - Admin Dashboard</h1>
   <div>
-    <button id="login-btn" class="btn btn-login">Admin Login</button>
+    <button id="login-btn" class="btn btn-login">Login with Google</button>
     <button id="logout-btn" class="btn btn-logout">Logout</button>
   </div>
 </div>
 
-<p id="error-msg" class="error-msg">⚠️ पहुँच वर्जित (Access Denied): आप एडमिन नहीं हैं!</p>
+<div id="message-box"></div>
 
 <div id="admin-content">
   <table>
@@ -48,7 +52,7 @@
       </tr>
     </thead>
     <tbody id="table-body">
-      <!-- Data will load here -->
+      <!-- डेटा यहाँ लोड होगा -->
     </tbody>
   </table>
 </div>
@@ -72,43 +76,64 @@
   const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
 
-  // === यहाँ अपनी ईमेल आईडी डालें जो एडमिन होगी ===
-  const ADMIN_EMAIL = "your.email@gmail.com"; 
+  // सिर्फ यही ईमेल आईडी एडमिन पैनल खोल पाएगी
+  const ADMIN_EMAIL = "thakurbalvir8237@gmail.com"; 
 
   const loginBtn = document.getElementById('login-btn');
   const logoutBtn = document.getElementById('logout-btn');
   const adminContent = document.getElementById('admin-content');
-  const errorMsg = document.getElementById('error-msg');
+  const messageBox = document.getElementById('message-box');
   const tableBody = document.getElementById('table-body');
 
+  // जब भी कोई वेबसाइट खोलेगा, यह चेक करेगा कि वो लॉग इन है या नहीं
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-      
-      // चेक करें कि क्या लॉगिन करने वाला यूजर एडमिन है
+      // अगर लॉग इन है, तो चेक करो कि क्या ईमेल एडमिन वाली है?
       if (user.email === ADMIN_EMAIL) {
-        errorMsg.style.display = 'none';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
         adminContent.style.display = 'block';
-        loadData();
+        
+        messageBox.className = 'welcome-msg';
+        messageBox.innerText = `स्वागत है एडमिन: ${user.email}`;
+        messageBox.style.display = 'block';
+        
+        loadData(); // डेटा लोड करो
       } else {
+        // अगर ईमेल एडमिन की नहीं है, तो उसे लॉग आउट कर दो
+        signOut(auth);
         adminContent.style.display = 'none';
-        errorMsg.style.display = 'block';
+        
+        messageBox.className = 'error-msg';
+        messageBox.innerText = "⚠️ पहुँच वर्जित (Access Denied): इस ईमेल आईडी को एडमिन पैनल देखने की अनुमति नहीं है!";
+        messageBox.style.display = 'block';
       }
     } else {
+      // कोई लॉग इन नहीं है
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
       adminContent.style.display = 'none';
-      errorMsg.style.display = 'none';
-      tableBody.innerHTML = ''; // Clear data on logout
+      tableBody.innerHTML = ''; 
     }
   });
 
-  loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-  logoutBtn.addEventListener('click', () => signOut(auth));
+  // Google Login बटन दबाने पर
+  loginBtn.addEventListener('click', () => {
+    messageBox.style.display = 'none'; // पुराना मैसेज हटाओ
+    signInWithPopup(auth, provider).catch((error) => {
+      console.error("Login Error:", error);
+    });
+  });
 
+  // Logout बटन दबाने पर
+  logoutBtn.addEventListener('click', () => {
+    signOut(auth);
+    messageBox.style.display = 'none';
+  });
+
+  // फायरबेस से डेटा मंगाने का फंक्शन
   async function loadData() {
-    tableBody.innerHTML = '<tr><td colspan="7">Loading data...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">डेटा लोड हो रहा है...</td></tr>';
     try {
       const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(q);
@@ -131,7 +156,7 @@
         tableBody.appendChild(tr);
       });
     } catch (error) {
-      tableBody.innerHTML = '<tr><td colspan="7">Error loading data.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">डेटा लोड करने में समस्या आई।</td></tr>';
       console.error(error);
     }
   }
