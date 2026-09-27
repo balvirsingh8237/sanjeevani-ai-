@@ -15,8 +15,6 @@
     --text-main: #16241D;
     --text-light: #4A5D53;
     --border: #CFE3D6;
-    --urgent: #B5473E;
-    --normal: #DA9A3D;
   }
   
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,23 +22,29 @@
   h1, h2, h3 { font-family: 'Fraunces', serif; color: var(--primary); }
 
   /* --- Premium Header --- */
-  header { position: sticky; top: 0; background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 100; }
+  header { position: sticky; top: 0; background: var(--white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); z-index: 100; flex-wrap: wrap; gap: 15px; }
   .brand { font-size: 1.8rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-  .header-actions { display: flex; align-items: center; gap: 20px; }
+  .header-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
   
+  /* Auth UI */
+  .auth-section { display: flex; align-items: center; gap: 10px; }
+  .user-pic { width: 35px; height: 35px; border-radius: 50%; display: none; border: 2px solid var(--secondary); }
+  .btn-auth { background: #4285F4; color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+  #logout-btn { background: #d93025; display: none; }
+
   /* Language Toggle */
   .lang-toggle { display: flex; border: 2px solid var(--border); border-radius: 30px; overflow: hidden; background: var(--white); }
-  .lang-btn { background: none; border: none; padding: 8px 16px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: 0.3s; }
+  .lang-btn { background: none; border: none; padding: 6px 14px; font-weight: 600; cursor: pointer; color: var(--text-light); transition: 0.3s; }
   .lang-btn.active { background: var(--primary); color: var(--white); }
 
   /* AI Button */
-  .ai-btn-header { background: linear-gradient(135deg, #1B4332, #40916C); color: var(--white); border: none; padding: 10px 24px; border-radius: 30px; font-weight: 600; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.3); transition: transform 0.2s; }
+  .ai-btn-header { background: linear-gradient(135deg, #1B4332, #40916C); color: var(--white); border: none; padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.3); transition: 0.2s; }
   .ai-btn-header:hover { transform: translateY(-2px); }
 
   /* --- Hero Section --- */
-  .hero { text-align: center; padding: 80px 5% 60px; background: linear-gradient(180deg, var(--white) 0%, var(--bg-color) 100%); }
-  .hero h1 { font-size: 3.5rem; max-width: 900px; margin: 0 auto 20px; line-height: 1.2; }
-  .hero p { font-size: 1.2rem; color: var(--text-light); max-width: 700px; margin: 0 auto; }
+  .hero { text-align: center; padding: 60px 5%; background: linear-gradient(180deg, var(--white) 0%, var(--bg-color) 100%); }
+  .hero h1 { font-size: 3rem; max-width: 900px; margin: 0 auto 20px; line-height: 1.2; }
+  .hero p { font-size: 1.1rem; color: var(--text-light); max-width: 700px; margin: 0 auto; }
 
   /* --- Form Section --- */
   .container { max-width: 900px; margin: 0 auto 80px; padding: 40px; background: var(--white); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid var(--border); }
@@ -54,40 +58,35 @@
   input:focus, textarea:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 3px var(--accent); }
   
   .submit-btn { grid-column: 1 / -1; padding: 18px; border: none; border-radius: 10px; background: var(--primary); color: var(--white); font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-  .submit-btn:hover { background: #123527; }
+  .submit-btn:disabled { background: #8fa89d; cursor: not-allowed; }
 
-  /* --- AI Chat Modal (Gemini Style Interface) --- */
+  /* --- AI Chat Modal --- */
   .ai-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
-  .ai-modal { width: 95%; max-width: 1000px; height: 90vh; background: var(--white); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out; }
-  
+  .ai-modal { width: 95%; max-width: 900px; height: 85vh; background: var(--white); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out; }
   @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
 
   .ai-header { background: var(--primary); color: var(--white); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
-  .ai-header h3 { color: var(--white); font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-  .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
-  .close-btn:hover { background: rgba(255,255,255,0.4); }
-
+  .ai-header h3 { color: var(--white); font-size: 1.5rem; }
+  .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+  
   .ai-body { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg-color); display: flex; flex-direction: column; gap: 20px; }
   .msg { max-width: 75%; padding: 15px 20px; border-radius: 20px; font-size: 1.05rem; line-height: 1.5; }
   .msg.ai { background: var(--white); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-  .msg.user { background: var(--primary); color: var(--white); align-self: flex-end; border-bottom-right-radius: 5px; box-shadow: 0 4px 15px rgba(27, 67, 50, 0.2); }
+  .msg.user { background: var(--primary); color: var(--white); align-self: flex-end; border-bottom-right-radius: 5px; }
 
   .ai-footer { padding: 20px 30px; background: var(--white); border-top: 1px solid var(--border); display: flex; gap: 15px; }
-  .ai-footer input { flex: 1; padding: 18px 25px; border-radius: 50px; border: 2px solid var(--border); font-size: 1.1rem; background: #F8FBF9; }
-  .ai-footer button { background: var(--secondary); color: var(--white); border: none; padding: 0 35px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
-  .ai-footer button:hover { background: var(--primary); }
+  .ai-footer input { flex: 1; padding: 18px 25px; border-radius: 50px; border: 2px solid var(--border); font-size: 1.1rem; }
+  .ai-footer button { background: var(--secondary); color: var(--white); border: none; padding: 0 35px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
 
   @media (max-width: 768px) {
     .form-grid { grid-template-columns: 1fr; }
-    .hero h1 { font-size: 2.5rem; }
-    .brand { font-size: 1.4rem; }
-    .ai-btn-header span { display: none; } /* Hide text on mobile, show only icon */
+    .hero h1 { font-size: 2.2rem; }
+    .ai-btn-header span { display: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div class="brand">🌱 Sanjeevani AI</div>
   <div class="header-actions">
@@ -95,19 +94,25 @@
       <button id="lang-en" class="lang-btn active" onclick="changeLang('en')">EN</button>
       <button id="lang-hi" class="lang-btn" onclick="changeLang('hi')">हिं</button>
     </div>
+    
+    <!-- Auth UI -->
+    <div class="auth-section">
+      <img id="user-pic" class="user-pic" src="" alt="Profile">
+      <button id="login-btn" class="btn-auth" data-i18n="btn_login">Login</button>
+      <button id="logout-btn" class="btn-auth" data-i18n="btn_logout">Logout</button>
+    </div>
+
     <button class="ai-btn-header" onclick="openAI()">
-      ✨ <span data-i18n="btn_ai">Ask AI Assistant</span>
+      ✨ <span data-i18n="btn_ai">Ask AI</span>
     </button>
   </div>
 </header>
 
-<!-- Hero Section -->
 <section class="hero">
   <h1 data-i18n="hero_title">Help reaches every village, on time.</h1>
   <p data-i18n="hero_desc">Report your health issues and our medical team will reach out based on urgency. You can also chat with our AI for immediate medical advice.</p>
 </section>
 
-<!-- Form Section -->
 <div class="container">
   <h2 data-i18n="form_title">Report a Medical Issue</h2>
   <form id="problem-form">
@@ -140,12 +145,12 @@
           <option value="low" data-i18n="opt_low">Low Priority (Routine checkup)</option>
         </select>
       </div>
-      <button type="submit" id="submit-btn" class="submit-btn" data-i18n="btn_submit">Submit Report</button>
+      <button type="submit" id="submit-btn" class="submit-btn" disabled>Login required to Submit</button>
     </div>
   </form>
 </div>
 
-<!-- AI Chat Modal (Gemini Interface) -->
+<!-- AI Modal -->
 <div class="ai-modal-overlay" id="ai-modal">
   <div class="ai-modal">
     <div class="ai-header">
@@ -164,9 +169,9 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAgYfbCOPHqQz4ML3q-9KRtBZ5FItnGdeo",
     authDomain: "sanjeevani-ai-52213.firebaseapp.com",
@@ -177,78 +182,102 @@
   };
 
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
 
-  // --- Multi-Language Logic (EN / HI) ---
+  let currentUser = null;
+  let currentLang = 'en';
+
+  // --- Multi-Language Logic ---
   const translations = {
     en: {
-      btn_ai: "Ask AI Assistant",
+      btn_login: "Login", btn_logout: "Logout", btn_ai: "Ask AI",
       hero_title: "Help reaches every village, on time.",
       hero_desc: "Report your health issues and our medical team will reach out based on urgency. You can also chat with our AI for immediate medical advice.",
       form_title: "Report a Medical Issue",
       lbl_name: "Patient's Full Name", lbl_age: "Age", lbl_mobile: "Mobile Number",
-      lbl_village: "Village / Address", lbl_problem: "Describe the Problem",
-      lbl_severity: "How urgent is this?",
-      opt_urgent: "Urgent (Need help within 6-24 hours)",
-      opt_normal: "Normal (Need help within 3-5 days)",
-      opt_low: "Low Priority (Routine checkup)",
-      btn_submit: "Submit Report",
-      ai_modal_title: "✨ Sanjeevani AI Doctor",
-      ai_greeting: "Hello! I am Sanjeevani AI. Please tell me about your health symptoms, and I will assist you immediately.",
-      btn_send: "Send",
-      alert_success: "Report submitted successfully! Our team will contact you soon.",
-      alert_error: "Error submitting report."
+      lbl_village: "Village / Address", lbl_problem: "Describe the Problem", lbl_severity: "How urgent is this?",
+      opt_urgent: "Urgent (Need help within 6-24 hours)", opt_normal: "Normal (Need help within 3-5 days)", opt_low: "Low Priority (Routine checkup)",
+      btn_submit: "Submit Report", btn_submit_locked: "Login required to Submit",
+      ai_modal_title: "✨ Sanjeevani AI Doctor", ai_greeting: "Hello! I am Sanjeevani AI. Please tell me about your health symptoms, and I will assist you immediately.",
+      btn_send: "Send", alert_success: "Report submitted successfully!", alert_error: "Error submitting report."
     },
     hi: {
-      btn_ai: "AI से बात करें",
+      btn_login: "लॉग इन", btn_logout: "लॉग आउट", btn_ai: "AI से बात करें",
       hero_title: "हर गाँव तक मदद, बिल्कुल सही समय पर।",
       hero_desc: "अपनी स्वास्थ्य समस्या दर्ज करें और हमारी टीम गंभीरता के आधार पर आप तक पहुंचेगी। तुरंत सलाह के लिए आप हमारे AI से बात कर सकते हैं।",
       form_title: "मेडिकल समस्या दर्ज करें",
       lbl_name: "मरीज़ का पूरा नाम", lbl_age: "उम्र", lbl_mobile: "मोबाइल नंबर",
-      lbl_village: "गाँव / पता", lbl_problem: "समस्या का विवरण दें",
-      lbl_severity: "समस्या कितनी गंभीर है?",
-      opt_urgent: "तुरंत (6-24 घंटे में मदद चाहिए)",
-      opt_normal: "सामान्य (3-5 दिन में मदद चाहिए)",
-      opt_low: "कम गंभीर (नियमित जांच)",
-      btn_submit: "समस्या दर्ज करें",
-      ai_modal_title: "✨ संजीवनी AI डॉक्टर",
-      ai_greeting: "नमस्ते! मैं संजीवनी AI हूँ। कृपया मुझे अपनी बीमारी या लक्षण बताएं, मैं तुरंत आपकी मदद करूँगा।",
-      btn_send: "भेजें",
-      alert_success: "शिकायत सफलतापूर्वक दर्ज हो गई है! हमारी टीम जल्द संपर्क करेगी।",
-      alert_error: "शिकायत दर्ज करने में समस्या आई।"
+      lbl_village: "गाँव / पता", lbl_problem: "समस्या का विवरण दें", lbl_severity: "समस्या कितनी गंभीर है?",
+      opt_urgent: "तुरंत (6-24 घंटे में मदद चाहिए)", opt_normal: "सामान्य (3-5 दिन में मदद चाहिए)", opt_low: "कम गंभीर (नियमित जांच)",
+      btn_submit: "समस्या दर्ज करें", btn_submit_locked: "लॉग इन के बाद फॉर्म जमा करें",
+      ai_modal_title: "✨ संजीवनी AI डॉक्टर", ai_greeting: "नमस्ते! मैं संजीवनी AI हूँ। कृपया मुझे अपनी बीमारी या लक्षण बताएं।",
+      btn_send: "भेजें", alert_success: "शिकायत सफलतापूर्वक दर्ज हो गई है!", alert_error: "शिकायत दर्ज करने में समस्या आई।"
     }
   };
 
-  let currentLang = 'en';
+  const submitBtn = document.getElementById('submit-btn');
+
+  function updateSubmitButtonText() {
+    if (currentUser) {
+      submitBtn.innerText = translations[currentLang].btn_submit;
+    } else {
+      submitBtn.innerText = translations[currentLang].btn_submit_locked;
+    }
+  }
 
   window.changeLang = function(lang) {
     currentLang = lang;
     document.getElementById('lang-en').classList.toggle('active', lang === 'en');
     document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
     
-    // Update inner text
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (translations[lang][key]) el.innerText = translations[lang][key];
     });
     
-    // Update placeholders
     document.getElementById('name').placeholder = lang === 'hi' ? "पूरा नाम" : "John Doe";
     document.getElementById('village').placeholder = lang === 'hi' ? "गाँव, ब्लॉक, जिला" : "Village, Block, District";
     document.getElementById('problem').placeholder = lang === 'hi' ? "लक्षण या समस्या विस्तार से लिखें..." : "Please describe symptoms or issues in detail...";
     document.getElementById('chat-text').placeholder = lang === 'hi' ? "अपनी समस्या यहाँ लिखें..." : "Type your symptoms here...";
+    
+    updateSubmitButtonText();
   };
 
-  // --- AI Modal Logic ---
-  const aiModal = document.getElementById('ai-modal');
-  window.openAI = () => { aiModal.style.display = 'flex'; };
-  window.closeAI = () => { aiModal.style.display = 'none'; };
+  // --- Auth Logic ---
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userPic = document.getElementById('user-pic');
 
-  // --- Form Submit Logic ---
-  const submitBtn = document.getElementById('submit-btn');
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+      userPic.src = user.photoURL;
+      userPic.style.display = 'block';
+      submitBtn.disabled = false;
+    } else {
+      currentUser = null;
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      userPic.style.display = 'none';
+      submitBtn.disabled = true;
+    }
+    updateSubmitButtonText();
+  });
+
+  loginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
+  logoutBtn.addEventListener('click', () => signOut(auth));
+
+  // --- Form Logic ---
   document.getElementById('problem-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!currentUser) return alert("Please login first");
+    
     submitBtn.innerText = "Submitting...";
+    submitBtn.disabled = true;
 
     try {
       await addDoc(collection(db, "reports"), {
@@ -258,6 +287,8 @@
         village: document.getElementById('village').value,
         problem: document.getElementById('problem').value,
         severity: document.getElementById('severity').value,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
         timestamp: serverTimestamp()
       });
       alert(translations[currentLang].alert_success);
@@ -265,11 +296,16 @@
     } catch (error) {
       alert(translations[currentLang].alert_error + " " + error.message);
     } finally {
-      submitBtn.innerText = translations[currentLang].btn_submit;
+      submitBtn.disabled = false;
+      updateSubmitButtonText();
     }
   });
 
-  // --- AI Chatbot API Logic ---
+  // --- AI Modal Logic ---
+  const aiModal = document.getElementById('ai-modal');
+  window.openAI = () => { aiModal.style.display = 'flex'; };
+  window.closeAI = () => { aiModal.style.display = 'none'; };
+
   const chatSendBtn = document.getElementById('chat-send');
   const chatInput = document.getElementById('chat-text');
   const chatBody = document.getElementById('chat-body');
@@ -299,7 +335,6 @@
     chatBody.scrollTop = chatBody.scrollHeight;
 
     try {
-      // Vercel Serverless Function Call
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -314,11 +349,8 @@
     }
   });
 
-  // Allow 'Enter' key to send message in chat
   chatInput.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-      chatSendBtn.click();
-    }
+    if (e.key === 'Enter') chatSendBtn.click();
   });
 </script>
 </body>
