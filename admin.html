@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Sanjeevani</title>
+<style>
+  body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+  h1 { color: #1B4332; }
+  table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+  th { background-color: #40916C; color: white; }
+  .urgent { color: red; font-weight: bold; }
+  .normal { color: orange; font-weight: bold; }
+  .low { color: green; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>संजीवनी AI - Admin Dashboard</h1>
+<p>यहाँ गाँव से आई सभी रिपोर्ट्स दिखेंगी:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>नाम</th>
+      <th>उम्र</th>
+      <th>नंबर</th>
+      <th>पता</th>
+      <th>समस्या</th>
+      <th>गंभीरता</th>
+    </tr>
+  </thead>
+  <tbody id="table-body">
+    <!-- Data will load here -->
+  </tbody>
+</table>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgYfbCOPHqQz4ML3q-9KRtBZ5FItnGdeo",
+    authDomain: "sanjeevani-ai-52213.firebaseapp.com",
+    projectId: "sanjeevani-ai-52213",
+    storageBucket: "sanjeevani-ai-52213.firebasestorage.app",
+    messagingSenderId: "1009486245779",
+    appId: "1:1009486245779:web:4c83bb570237c1f2ddc266"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const tableBody = document.getElementById('table-body');
+
+  async function loadData() {
+    const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${data.patientName}</td>
+        <td>${data.age}</td>
+        <td>${data.mobile}</td>
+        <td>${data.village}</td>
+        <td>${data.problem}</td>
+        <td class="${data.severity}">${data.severity.toUpperCase()}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  loadData();
+</script>
+</body>
+</html>
