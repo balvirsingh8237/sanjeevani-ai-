@@ -3,42 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - Sanjeevani AI</title>
+<title>Admin Auth - Sanjeevani</title>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Work Sans', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-  .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  h1 { color: #1B4332; margin: 0; font-size: 1.5rem; }
-  .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; font-size: 1rem; }
-  .btn-login { background: #4285F4; } /* Google Blue */
-  .btn-logout { background: #d93025; display: none; }
   
-  #admin-content { display: none; margin-top: 20px; }
-  table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+  /* पासवर्ड स्क्रीन का डिज़ाइन */
+  #auth-screen { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+  #auth-screen h2 { color: #1B4332; margin-bottom: 20px; }
+  .input-field { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+  .btn { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; font-size: 1rem; background: #1B4332; width: 100%; }
+  .error-msg { color: red; font-weight: bold; margin-top: 15px; display: none; }
+
+  /* एडमिन पैनल का डिज़ाइन (जो छुपकर रहेगा) */
+  #admin-panel { display: none; }
+  .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
   th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
   th { background-color: #1B4332; color: white; }
   .urgent { color: #B5473E; font-weight: bold; }
   .normal { color: #DA9A3D; font-weight: bold; }
   .low { color: #40916C; font-weight: bold; }
-  
-  #message-box { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; display: none; }
-  .error-msg { background: #ffe6e6; color: #d93025; border: 1px solid #d93025; }
-  .welcome-msg { background: #D8F3DC; color: #1B4332; border: 1px solid #40916C; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>संजीवनी AI - Admin Dashboard</h1>
-  <div>
-    <button id="login-btn" class="btn btn-login">Login with Google</button>
-    <button id="logout-btn" class="btn btn-logout">Logout</button>
-  </div>
+<!-- पासवर्ड मांगने वाली स्क्रीन -->
+<div id="auth-screen">
+  <h2>Admin Access</h2>
+  <p>कृपया एडमिन पासवर्ड डालें</p>
+  <input type="password" id="pass-input" class="input-field" placeholder="Enter Password">
+  <button id="unlock-btn" class="btn">Unlock Panel</button>
+  <p id="error-msg" class="error-msg">⚠️ गलत पासवर्ड!</p>
 </div>
 
-<div id="message-box"></div>
-
-<div id="admin-content">
+<!-- असली एडमिन पैनल (शुरू में छुपा रहेगा) -->
+<div id="admin-panel">
+  <div class="header">
+    <h1 style="color: #1B4332; margin: 0;">संजीवनी AI - Admin Dashboard</h1>
+    <button onclick="location.reload()" style="padding: 8px 15px; background: #d93025; color: white; border: none; border-radius: 5px; cursor: pointer;">Lock & Exit</button>
+  </div>
   <table>
     <thead>
       <tr>
@@ -59,7 +63,6 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -72,66 +75,26 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
 
-  // सिर्फ यही ईमेल आईडी एडमिन पैनल खोल पाएगी
-  const ADMIN_EMAIL = "thakurbalvir8237@gmail.com"; 
-
-  const loginBtn = document.getElementById('login-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const adminContent = document.getElementById('admin-content');
-  const messageBox = document.getElementById('message-box');
+  const authScreen = document.getElementById('auth-screen');
+  const adminPanel = document.getElementById('admin-panel');
+  const passInput = document.getElementById('pass-input');
+  const unlockBtn = document.getElementById('unlock-btn');
+  const errorMsg = document.getElementById('error-msg');
   const tableBody = document.getElementById('table-body');
 
-  // जब भी कोई वेबसाइट खोलेगा, यह चेक करेगा कि वो लॉग इन है या नहीं
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // अगर लॉग इन है, तो चेक करो कि क्या ईमेल एडमिन वाली है?
-      if (user.email === ADMIN_EMAIL) {
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-        adminContent.style.display = 'block';
-        
-        messageBox.className = 'welcome-msg';
-        messageBox.innerText = `स्वागत है एडमिन: ${user.email}`;
-        messageBox.style.display = 'block';
-        
-        loadData(); // डेटा लोड करो
-      } else {
-        // अगर ईमेल एडमिन की नहीं है, तो उसे लॉग आउट कर दो
-        signOut(auth);
-        adminContent.style.display = 'none';
-        
-        messageBox.className = 'error-msg';
-        messageBox.innerText = "⚠️ पहुँच वर्जित (Access Denied): इस ईमेल आईडी को एडमिन पैनल देखने की अनुमति नहीं है!";
-        messageBox.style.display = 'block';
-      }
+  // पासवर्ड चेक करने का लॉजिक
+  unlockBtn.addEventListener('click', () => {
+    if (passInput.value === 'बलबीर @420') {
+      authScreen.style.display = 'none';
+      adminPanel.style.display = 'block';
+      loadData(); // सही पासवर्ड पर ही फायरबेस से डेटा मंगाएंगे
     } else {
-      // कोई लॉग इन नहीं है
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-      adminContent.style.display = 'none';
-      tableBody.innerHTML = ''; 
+      errorMsg.style.display = 'block';
     }
   });
 
-  // Google Login बटन दबाने पर
-  loginBtn.addEventListener('click', () => {
-    messageBox.style.display = 'none'; // पुराना मैसेज हटाओ
-    signInWithPopup(auth, provider).catch((error) => {
-      console.error("Login Error:", error);
-    });
-  });
-
-  // Logout बटन दबाने पर
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-    messageBox.style.display = 'none';
-  });
-
-  // फायरबेस से डेटा मंगाने का फंक्शन
   async function loadData() {
     tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">डेटा लोड हो रहा है...</td></tr>';
     try {
@@ -156,8 +119,7 @@
         tableBody.appendChild(tr);
       });
     } catch (error) {
-      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">डेटा लोड करने में समस्या आई।</td></tr>';
-      console.error(error);
+      tableBody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">डेटा लोड करने में समस्या आई।</td></tr>';
     }
   }
 </script>
